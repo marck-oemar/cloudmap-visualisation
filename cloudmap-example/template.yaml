@@ -1,0 +1,95 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  SAM template for CloudMap Example services and instances
+
+Parameters:
+  NamespaceId:
+    Type: String
+    Description: "The Cloud Map Namespace ID (not the Namespace name)"
+
+Resources:
+  # application Mortgage
+  SrvFrontMort:
+    Type: AWS::ServiceDiscovery::Service
+    Properties:
+      Description: "Mortgage Frontend"
+      Name: "SrvFrontMort"
+      NamespaceId: !Ref NamespaceId
+      Tags:
+        - Key: "NEO4J_RELATIONSHIP_TO_SERVICE"
+          Value: "SrvBackMort"
+  InsFrontMort:
+    Type: AWS::ServiceDiscovery::Instance
+    Properties:
+      InstanceAttributes:
+        Name: "InsFrontMort"
+      InstanceId: "InsFrontMort"
+      ServiceId: !Ref SrvFrontMort
+
+  SrvBackMort:
+    Type: AWS::ServiceDiscovery::Service
+    Properties:
+      Description: "Mortgage Backend"
+      Name: "SrvBackMort"
+      NamespaceId: !Ref NamespaceId
+      Tags:
+        - Key: "NEO4J_RELATIONSHIP_TO_SERVICE"
+          Value: "ServiceMail"
+  InsBackMort:
+    Type: AWS::ServiceDiscovery::Instance
+    Properties:
+      InstanceAttributes:
+        Name: "InsBackMort"
+      InstanceId: "InsBackMort"
+      ServiceId: !Ref SrvBackMort
+
+  # application Insurance
+  SrvFrontInsu:
+    Type: AWS::ServiceDiscovery::Service
+    Properties:
+      Description: "Insurance Frontend"
+      Name: "SrvFrontInsu"
+      NamespaceId: !Ref NamespaceId
+      Tags:
+        - Key: "NEO4J_RELATIONSHIP_TO_SERVICE"
+          Value: "SrvBackInsu"
+  InsFrontInsu:
+    Type: AWS::ServiceDiscovery::Instance
+    Properties:
+      InstanceAttributes:
+        Name: "InsFrontInsu"
+      InstanceId: "InsFrontInsu"
+      ServiceId: !Ref SrvFrontInsu
+
+  SrvBackInsu:
+    Type: AWS::ServiceDiscovery::Service
+    Properties:
+      Description: "Insurance Backend"
+      Name: "SrvBackInsu"
+      NamespaceId: !Ref NamespaceId
+      Tags:
+        - Key: "NEO4J_RELATIONSHIP_TO_SERVICE"
+          Value: "ServiceMail"
+  InsBackInsu:
+    Type: AWS::ServiceDiscovery::Instance
+    Properties:
+      InstanceAttributes:
+        Name: "InsBackInsu"
+      InstanceId: "InsBackInsu"
+      ServiceId: !Ref SrvBackInsu
+
+  # Mail service
+  ServiceMail:
+    Type: AWS::ServiceDiscovery::Service
+    Properties:
+      Description: "Mail"
+      Name: "ServiceMail"
+      NamespaceId: !Ref NamespaceId
+  InstanceMail:
+    Type: AWS::ServiceDiscovery::Instance
+    Properties:
+      InstanceAttributes:
+        Name: "InstanceMail"
+      InstanceId: "InstanceMail"
+      ServiceId: !Ref ServiceMail

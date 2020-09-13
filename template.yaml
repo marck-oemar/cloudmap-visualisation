@@ -1,0 +1,97 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  SAM template for Cloud Map visualisation
+
+Globals:
+  Function:
+    Timeout: 60
+
+Parameters:
+  NamespaceId:
+    Type: String
+    Description: "The Cloud Map Namespace ID (not the Namespace name) to observe"
+  Neo4jUrl:
+    Type: String
+    Description: "Neo4j Bolt URL to connect to the neo4j database"
+Resources:
+  ProducerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: producer/
+      Handler: producer.lambda_handler
+      Runtime: python3.7
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - servicediscovery:*
+                - sqs:*
+              Resource: "*"
+      Environment:
+        Variables:
+          ENV_NAMESPACE_ID: !Ref NamespaceId
+          ENV_QUEUE_URL: !Ref SQSQueue
+
+  ConsumerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: consumer/
+      Handler: consumer.lambda_handler
+      Runtime: python3.7
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AWSLambdaSQSQueueExecutionRole
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:*
+              Resource: "*"
+      Events:
+        SQSEvent:
+          Type: SQS
+          Properties:
+            Queue:
+              Fn::GetAtt:
+                - "SQSQueue"
+                - "Arn"
+            BatchSize: 1
+            Enabled: true
+      Environment:
+        Variables:
+          ENV_LOCK_ITEM_ID: lock
+          ENV_TABLE_NAME: !Ref LockingTable
+          NEO4J_URL: !Ref Neo4jUrl
+
+  LockingTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: "id"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "id"
+          KeyType: "HASH"
+      ProvisionedThroughput:
+        ReadCapacityUnits: "5"
+        WriteCapacityUnits: "5"
+
+  SQSQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      VisibilityTimeout: 70
+
+  Neo4jECSTask:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      RequiresCompatibilities:
+        - "FARGATE"
+      ContainerDefinitions:
+        - Name: "neo4j"
+          Image: "neo4j:3.5"
+          Cpu: 512
+          Memory: 2048
+          Essential: true
