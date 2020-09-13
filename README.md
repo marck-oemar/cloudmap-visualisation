@@ -33,7 +33,7 @@ In the following order:
 
 ### 1 - CloudMap
 - Create a CloudMap API namespace
-- Use the cloudmap-example SAM template in this repo to deploy example services and instances
+- Use the [*cloudmap-example SAM template*](cloudmap-example/template.yaml) in this repo to deploy example services and instances
 - If you want to have a relationship between services, create a tag 'NEO4J_RELATIONSHIP_TO_SERVICE' on the service with the name of the other service as the value.
 
 
@@ -46,7 +46,7 @@ In the following order:
 CREATE CONSTRAINT ON (n:Service) ASSERT n.name IS UNIQUE
 ```
 
-### Deploy the stack
+### 3 - Deploy the stack
 Deploy the SAM template which will deploy:
 - Producer lambda function
 - SQS queue
