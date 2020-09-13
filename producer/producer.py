@@ -76,7 +76,3 @@ def lambda_handler(event, context):
     logging.info(str(json_payload))
     sqs_client = client('sqs')
     send_message(sqs_client, queue_url, json_payload)
-
-
-if __name__ == '__main__':
-    lambda_handler("", "")
