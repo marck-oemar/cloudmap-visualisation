@@ -1,5 +1,8 @@
 # Visualisation of AWS Cloudmap services with NEO4J
 
+![image](images/neo4j_example.png)
+
+
 ## Context
 [*AWS Cloud Map Service Discovery*](https://aws.amazon.com/cloud-map/) is a great way to implement service discovery and to have an overview of live services and instances.
 This PoC takes CloudMap a step further and aims to visualize the services and the dependencies between them by using [*Neo4j*](https://neo4j.com).
